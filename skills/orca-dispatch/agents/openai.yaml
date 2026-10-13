@@ -1,0 +1,5 @@
+interface:
+  display_name: "Orca Dispatch"
+  short_description: "Supervise Orca workers to fix bugs or build features"
+policy:
+  allow_implicit_invocation: false
