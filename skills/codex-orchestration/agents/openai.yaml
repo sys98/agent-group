@@ -1,4 +1,6 @@
 interface:
   display_name: "Codex 交付编排"
-  short_description: "在 Codex 内协调并行实施、文件归属、独立审查和真实业务验收"
-  default_prompt: "使用 $codex-orchestration 拆分任务，协调 Codex 子代理实施并验证，直到授权范围内的交付完成。"
+  short_description: "在独立分支和工作树派发 Codex worker，监督 Matt 联动、双轴审查与集成验收"
+  default_prompt: "使用 $codex-orchestration 调查并拆分任务，在独立工作树启动 Codex worker，监督实施、双轴审查和集成验证，直到授权范围内的交付完成。"
+policy:
+  allow_implicit_invocation: false

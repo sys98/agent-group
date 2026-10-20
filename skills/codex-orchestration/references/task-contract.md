@@ -1,32 +1,61 @@
-# 子任务合同与回执
+# Worker 任务合同与回执
 
-向代理派发时提供以下内容，删去与本任务无关的字段，不复制长对话替代合同：
+每项任务一份合同，由 coordinator 补齐实际值。背景以可访问文件或链接引用，不能依赖另一会话的隐藏上下文。合同放在计划指定的持久位置；需要 worker 读取的非机密文档必须在其工作区可访问。
 
-- 任务 ID / 本次尝试 / 负责人 / 波次 / 模型及选择依据：
-- 用户目标、最新纠正、非目标与授权边界：
-- 工作目录、分支、相关 HEAD、dirty 基线和必须保留的改动：
-- 可编辑文件/模块；共享文件由谁整合：
-- 真实接口、上游输入、依赖与消费方：
-- 业务完成标准、公开接口测试切入点、已运行的失败检查、项目 canonical 验证命令；测试库/端口/临时目录隔离规则：
-- 必须加载的技能绝对路径及阶段、已确认测试切入点的计划/用户答复坐标；依赖缺失时如何报告：
-- 何时检查消息、何时需要报告冲突：
+## 派发材料
 
-执行合同：执行方式已由 coordinator 明确，直接实施，不重复向用户询问；阻碍报告 coordinator。在已确定切入点按红→绿修复或实现，完成后运行约定检查。仅修改所属工作区和文件；不擅自提交、合并、推送、部署或改项目 MEMORY.md；长期发现交主代理记录。主代理发来的修改意见在自然检查点处理，无法满足则报告，不静默扩大范围。
+- Task ID、尝试 ID、波次、blockers、负责人、模型与选择依据。
+- 用户目标、最新纠正、非目标、授权边界、可观察业务验收。
+- 仓库与 Git common dir 的真实路径、独立 worker worktree 的真实路径、任务分支、完整 base SHA；必须保留的已有输入及其来源。
+- 允许修改的文件/模块；公共合同 owner；不得修改的文件和共享资源。
+- 规格、项目规范、词汇与相关 ADR、接口与调用方的可访问路径，指出相关章节。
+- 测试切入点，catches/misses，用户确认的原文或持久坐标；bug 的已实际跑红命令、最小复现与根因证据。
+- canonical 验证命令及资源隔离规则：测试库、端口、临时产物，必要的目标库只读核对；不提供 secret 值。
+- 必须实际读取的 Matt 技能真实路径和阶段：`tdd` 与其 test/mocking 参考；bug 加 `diagnosing-bugs` 5–6；seam 自身未定先回报，必要时读 `codebase-design`。
+- 持久回执位置、coordinator 的 blocked/续作协议、可执行的本地提交范围；未授权动作的处理方式。
 
-## Worker 必须遵守的 Matt 技能联动
+## 必须随合同传给 worker 的执行约束
 
-1. 开始前实际读取任务合同指定的 `tdd/SKILL.md` 及其要求的相关参考；读取项目领域词汇和相关 ADR。切入点已在计划中确定，不重复问用户；缺失或需变更时先向 coordinator 报告，由其确定后再写测试。
-2. 每次一个行为测试 → 实际失败 → 最小实现 → 通过；通过公开接口观察结果，预期值来自需求/独立样例。不得先写全套测试再补实现，不测私有细节、不用内部调用计数或同义计算冒充行为证据。重构属于审查后工作，不夹在红→绿循环中顺手扩张。
-3. 修 bug 同时实际读取 `diagnosing-bugs/SKILL.md`，执行阶段 5、6：以 coordinator 已运行的最小复现为首个回归依据，在正确切入点先红后绿，重跑原始场景并清理临时诊断；不存在正确切入点时明确报告，不以浅层绿测代替复现。
-4. 切入点或公开 interface 本身尚未确定时，先读 `codebase-design/SKILL.md` 的词汇和 seam 指导，向 coordinator 返回取舍；不自行重启整套需求访谈或新增臆测抽象。
-5. 完成前检查新消息并运行约定 canonical 验证命令。读取过的技能、红/绿命令和结果、原始复现复测、缺口均写入回执；未经运行不能写 succeeded，不能自行宣称独立审查通过。
+```text
+Execution mode is already chosen: implement this task directly in the assigned worktree.
+You are an independent implementation worker. Do not spawn implementation subagents.
 
-回执应给出：完成/失败/受阻、实际加载的技能与对应阶段、实际变更坐标、执行的验证和结果、未验证路径、依赖或阻碍、需要主代理整合的合同。候选不得自批；不默认提交、部署或调用真实外部系统。
+Before writing:
+- Read the project rules and the actual Matt skill files named in the contract.
+- Verify the physical cwd, Git common directory, task branch, and HEAD against the contract.
+- On the first attempt require a clean checkout at the assigned base; on a repair verify
+  the recorded candidate and explicitly owned changes. Report any mismatch as blocked.
+- Use only the confirmed public test seams. If confirmation is missing or a seam must
+  change, report the exact decision needed instead of inventing user approval.
 
-## 恢复场景自检
+During implementation:
+- For behavior changes, work one public behavior test -> observed red -> minimal fix -> green.
+- For bugs, perform diagnosing-bugs phases 5-6 and rerun the original reproduction.
+- Do not use private implementation mocks or tautological assertions as acceptance evidence.
+- Edit only owned paths in this worktree; do not merge, push, deploy, change shared services,
+  read credentials, or edit project MEMORY.md. Do not switch another worktree or branch.
+- Check the task's persisted instructions at natural checkpoints: before new files,
+  after verification, and before reporting. Do not assume a live Orca mailbox exists.
+- Commit only this task's verified files when local commits are authorized. Check the
+  staged diff first. If sandbox or project rules block a commit, report ready_for_commit
+  with the exact uncommitted file set; do not widen permissions or self-approve.
 
-1. 同模块另一个代理仍运行：先确认停止写入，再接替；只收到消息 accepted 还不够。
-2. UI 已完成但下载接口失败：任务仍未验证，修接口并实际下载，不用按钮存在代替完成。
-3. 两代理都要改同一公共类型：先确定一个 owner；另一代理发出需要的接口变更，再按合同消费。
-4. 原工作区 dirty、HEAD 落后：不默认干净 worktree 等于真实基线，先确定如何包含未提交输入。
-5. 测试通过但缺真实媒体验收：分开报告工程验证与真实制作，不放宽门槛。
+Reporting:
+- If blocked, stop task writes and finish the turn with status blocked, a concrete question,
+  current branch/HEAD, owned changes, and any missing permission or evidence.
+- If ready, finish with status ready_for_review (or ready_for_commit), not independently
+  approved. Include the evidence below. The coordinator verifies the real process has ended.
+- Repairs resume this same task in the same worktree. Do not create a replacement writer.
+```
+
+`ready_for_commit` 仅是待 coordinator 核验的中间态：worker 必须已停止；coordinator 在授权范围内审核真实 diff 并创建固定候选提交，之后才进入双轴审查。没有提交权限则保留现场并报告待批，不能改用 HEAD 排除未提交内容。
+
+## 回执
+
+- 状态：`blocked` / `ready_for_commit` / `ready_for_review` / `failed`，以及原因。
+- Task/attempt、真实 worktree、分支、base SHA、候选 SHA 与 dirty/未跟踪文件。
+- 实际加载的技能路径与阶段；每条已运行命令和结果，适用的 red/green、原始场景复测。
+- 改动与用户目标的关系、业务验收、未验证路径、已知限制和阻碍。
+- 要问 coordinator 或用户的具体问题，长期发现供 coordinator 记录。
+
+CLI 会话 ID、宿主进程句柄和进程退出状态由 coordinator 从真实执行事件记录，不让 worker 猜。回执、进程退出、绿色测试、独立审查和集成验收分别取证。

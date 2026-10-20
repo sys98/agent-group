@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
-  <title id="title">orca-dispatch 的工作流程</title>
-  <desc id="desc">Orca coordinator 先调查并计划，再分波派发和监督 worker，最后双轴审查、集成验证并按授权收尾。</desc>
+  <title id="title">agent-group 的交付链</title>
+  <desc id="desc">coordinator 先调查并计划，再派发独立工作树中的 worker，最后固定候选，双轴审查、串行集成验证并按授权收尾。</desc>
   <rect width="1200" height="500" rx="24" fill="#0B0F14"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
-    <text x="58" y="68" font-size="40" font-weight="700" fill="#F1EEE7">orca-dispatch · 从问题到集成验证</text>
-    <text x="58" y="108" font-size="20" fill="#8994A3">流程图仅描述 Orca 版本；Codex 原生协作见对应技能说明</text>
+    <text x="58" y="68" font-size="40" font-weight="700" fill="#F1EEE7">从问题到集成验证</text>
+    <text x="58" y="108" font-size="20" fill="#8994A3">Orca / Codex · 每个实施任务都有独立 worker、分支与工作树</text>
   </g>
 
   <g id="stages" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
@@ -25,7 +25,7 @@
       <circle cx="46" cy="43" r="22" fill="#202A35"/>
       <text x="46" y="50" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" fill="#F1EEE7">02</text>
       <text x="88" y="39" font-size="25" font-weight="650" fill="#F1EEE7">按波次派发并监督 worker</text>
-      <text x="88" y="68" font-size="20" fill="#AEB8C5">明确文件归属与验收标准；coordinator 持续跟进回执和阻碍</text>
+      <text x="88" y="68" font-size="20" fill="#AEB8C5">先核对任务基线和独立工作树；持续跟进回执与阻碍</text>
       <g transform="translate(880 24)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">
         <rect width="70" height="38" rx="8" fill="#0B0F14"/><text x="35" y="25" text-anchor="middle" fill="#AEB8C5">task A</text>
         <rect x="80" width="70" height="38" rx="8" fill="#0B0F14"/><text x="115" y="25" text-anchor="middle" fill="#AEB8C5">task B</text>
@@ -40,7 +40,7 @@
       <circle cx="46" cy="39" r="22" fill="#173127"/>
       <text x="46" y="46" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" fill="#76D2B3">03</text>
       <text x="88" y="37" font-size="25" font-weight="650" fill="#F1EEE7">双轴审查、集成验证与收尾</text>
-      <text x="88" y="64" font-size="20" fill="#A7CBBE">逐分支复核规范与需求，再集成；推送和部署遵守授权</text>
+      <text x="88" y="64" font-size="20" fill="#A7CBBE">固定候选复核规范与需求，串行集成，再启动依赖波次</text>
       <text x="1045" y="48" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#76D2B3">REVIEW → VERIFY</text>
     </g>
   </g>

@@ -1,17 +1,18 @@
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="agent-group 提供 Orca 派发与 Codex 原生编排两种技能，协助调查、拆分、监督、审查和集成多代理任务">
+  <img src="./assets/readme/hero.svg" width="100%" alt="agent-group 通过 Orca 或 Codex 独立 worker 在各自分支与工作树实施，由 coordinator 调查、监督、独立审查并集成验证">
 </p>
 
-**agent-group** 提供两种中文多代理交付技能：用 [`orca-dispatch`](skills/orca-dispatch/SKILL.md) 协调 Orca worker，或用 [`codex-orchestration`](skills/codex-orchestration/SKILL.md) 协调 Codex 原生子代理。两者都让 coordinator 对调查、任务边界和结果验收负责，并遵守各自宿主的能力与授权边界。
+**agent-group** 提供两种中文多代理交付技能：用 [`orca-dispatch`](skills/orca-dispatch/SKILL.md) 协调 [Orca](https://github.com/stablyai/orca) worker，或用 [`codex-orchestration`](skills/codex-orchestration/SKILL.md) 启动独立 Codex worker。实施任务在各自的分支与工作树中完成，由 coordinator 调查、监督、复核候选，再串行集成。
 
 ## 选择适合你的技能
 
-| | `orca-dispatch` | `codex-orchestration` |
+| | [Orca 版](skills/orca-dispatch/SKILL.md) | [Codex 版](skills/codex-orchestration/SKILL.md) |
 |---|---|---|
-| 适用环境 | 配置了 Orca 的 Claude Code 或 Codex | Codex 原生代理协作 |
-| 执行方式 | Orca Run、worker 和独立分支 | Codex 子代理与任务账本 |
-| 恢复方式 | `继续 <run_id>`，依据 Orca 和 Git 状态 | 检查代理、Git 与项目账本，从最早未完成步骤继续 |
-| 技能入口 | `/orca-dispatch` 或 `$orca-dispatch` | `$codex-orchestration` |
+| 宿主 | Claude Code / Codex | Codex |
+| 执行器 | Orca worker | Codex CLI |
+| 恢复坐标 | Run + Git | 账本 + 会话 + Git |
+
+两版都在独立分支与工作树实施。Orca 负责创建并管理其 worker；Codex 版由 coordinator 先建树，再启动独立 CLI 会话。具体调用见下方快速开始。
 
 ## 为什么使用 coordinator
 
@@ -19,15 +20,17 @@
 
 - 修 bug 时先复现并定位原因；做功能时先读现有需求，只澄清会改变实现的决策。
 - 任务按窄切片和依赖波次划分，明确负责人、文件归属与验收标准。
-- coordinator 重新运行适用检查，并分别审查规范符合度和需求符合度。
+- 每个实施任务使用独立工作树；同一共享合同仍需统一归属，端口和数据库另行隔离。
+- Codex 版将明确确认的测试切入点交给 worker，按 Matt 的逐条红绿循环实现，并独立审查规范符合度与需求符合度。
+- coordinator 重跑适用检查，按固定候选完成双轴审查，集成验证通过后才启动依赖波次。
 - 合并、推送、部署和生产操作仍受项目规则与用户授权约束。
 
-## Orca 工作流
+## 从问题到集成
 
-下图展示 `orca-dispatch` 的 Orca 生命周期。Codex 原生协作的工具、监督与恢复方式不同，见 [`codex-orchestration`](skills/codex-orchestration/SKILL.md)。
+两个技能共享以下交付链，使用各自的 worker 执行器。Codex 的启动、监督、指定会话恢复和安全清理见 [worker 运行说明](skills/codex-orchestration/references/worker-runtime.md)。
 
 <p align="center">
-  <img src="./assets/readme/workflow.svg" width="100%" alt="orca-dispatch 从同步和调查、澄清计划、按波次派发，到监督 worker、审查分支并集成验证的流程">
+  <img src="./assets/readme/workflow.svg" width="100%" alt="先调查与计划，再派发独立工作树中的 worker，最后固定候选进行双轴审查、串行集成与验证">
 </p>
 
 ## 快速开始
@@ -53,9 +56,19 @@ Codex 调用 Orca 技能时使用 `$orca-dispatch`。常用参数：
 | `worker 用 opus\|sonnet\|fable\|codex` | 指定本次 worker 使用的模型或 agent |
 | `继续 <run_id>` | 按 Orca 与 Git 实际状态恢复中断的编排 |
 
-### 使用 Codex 原生子代理
+### 使用独立 Codex worker
 
-在 Codex 中调用 `$codex-orchestration` 并描述目标。技能使用 Codex 当前提供的原生协作工具，按任务维护负责人、文件归属、基线、验收和证据；它不依赖 Orca Run，也不提供 Orca FIFO 消息确认、PTY 唤醒或持久 Run 的等价保证。
+在 Codex 中调用：
+
+```text
+$codex-orchestration 修复素材生成点击后一直转圈的问题
+$codex-orchestration 实现 docs/PRD.md 第 3 节「批量生成」 先确认
+$codex-orchestration 继续 <账本路径>
+```
+
+coordinator 为每个任务核对独立分支与工作树，再以 `codex exec -C <worktree>` 启动独立会话。原生子代理只承担只读调查和 Matt 双轴审查。缺少独立 worker 或工作树能力时停止实施派发；worker 需要决策时以 blocked 回执结束当前 turn，收到答复后在原工作树恢复指定会话。
+
+支持 `先聊清楚`、`先确认`、`推送` 和 `worker 用 <实际模型 ID>`。未指定模型时沿用 CLI 配置。账本记录真实进程、会话与 Git 坐标，帮助中断后恢复；它不提供 Orca FIFO ack，也不会在 coordinator 关闭后自动监督。
 
 ## 安装
 
@@ -73,21 +86,21 @@ ln -s "$PWD/skills/orca-dispatch" ~/.claude/skills/orca-dispatch
 mkdir -p ~/.agents/skills
 ln -s "$PWD/skills/orca-dispatch" ~/.agents/skills/orca-dispatch
 
-# Codex native orchestration
+# Independent Codex workers
 mkdir -p ~/.codex/skills
 ln -s "$PWD/skills/codex-orchestration" ~/.codex/skills/codex-orchestration
 
-# Shared agent skill directory, if your host reads it
-ln -s "$PWD/skills/codex-orchestration" ~/.agents/skills/codex-orchestration
+# Alternatively, use ~/.agents/skills if your host reads that directory.
+# Install codex-orchestration in only one discovery directory.
 ```
 
 如目标链接已存在，请先按本机技能管理方式处理，避免覆盖已有安装。
 
-## 依赖与限制
+## 依赖与边界
 
-| 技能 | 依赖与边界 |
-|---|---|
-| `orca-dispatch` | 需要 Orca 的 `orchestration`、`orca-cli` 技能；按阶段使用 `grilling`、`prototype`、`diagnosing-bugs`、`tdd`、`to-tickets`、`code-review`。在 Codex 中使用原生选择题时，可按需启用实验性 `default_mode_request_user_input` 功能。 |
-| `codex-orchestration` | 需要当前 Codex 会话实际提供原生代理与任务协调工具；按阶段使用 `grilling`、`prototype`、`diagnosing-bugs`、`to-tickets`、`tdd`、`codebase-design`、`code-review`。 |
+- **Orca 版本**需要 Orca 与其 `orchestration`、`orca-cli` 技能。
+- **Codex 版本**需要 Git、Codex CLI、可跟踪的独立进程执行能力，以及用于 Matt 双轴审查的两个独立只读上下文。文档命令已对照本机 Codex CLI 0.163.0 帮助核对；其他版本应先检查实际能力。
+- 按阶段读取 [Matt Pocock 技能](https://github.com/mattpocock/skills)：`grilling`、`prototype`、`diagnosing-bugs`、`to-tickets`、`tdd` 与 `code-review`；公开接口尚未确定时还需 `codebase-design`。Codex 版的责任分工和显式流程覆盖见 [Matt 联动说明](skills/codex-orchestration/references/matt-skill-routing.md)。
+- 这些是交付流程指令。CLI 帮助核对、技能格式校验和 Git 隔离检查不等于真实项目的完整多 worker 交付验收。
 
-两个技能都以单个功能或 bug 的一次交付为目标；需要跨多天管理的大工程应结合项目自己的 issue tracker 和交付流程。`orca-dispatch` 的命令兼容性已按 Orca 1.4.222、Claude Code 2.1.296 和 Codex CLI 0.162.1 的帮助信息核对；完整多 worker 流程仍在实际使用中打磨。worker 默认模型和中文分支命名是作者的工作习惯，可按需修改技能正文。
+适合单个功能或 bug 的一次交付；跨多天工作应结合项目的 tracker 与交付流程。生产部署始终单独授权。Orca 的模型映射、命名和消息机制属于其宿主约定，不套用到 Codex CLI。
