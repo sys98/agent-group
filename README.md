@@ -2,23 +2,32 @@
   <img src="./assets/readme/hero.svg" width="100%" alt="orca-dispatch: one command takes a bug or feature through investigation, splitting, parallel Orca workers, per-branch review and merge">
 </p>
 
-**orca-dispatch** 是一个给 [Orca](https://github.com/stablyai/orca) 用的 agent skill。你在 Claude Code 或 Codex 里用一条命令描述一个 bug 或新功能，它会以 coordinator 的身份自己完成排查、拆分、并行派发 Orca worker、逐分支审查和合并，只在需要你决策的地方停下来问你。
+本仓库提供两个多代理交付技能：**[orca-dispatch](skills/orca-dispatch/SKILL.md)** 面向 [Orca](https://github.com/stablyai/orca)，**[codex-orchestration](skills/codex-orchestration/SKILL.md)** 面向 Codex 原生代理协作。它们都帮助 coordinator 调查问题、拆分任务、监督实施、复核结果并完成集成；具体执行方式和权限边界按各自宿主适配。
 
-> 本仓库目前只有一个技能：[`skills/orca-dispatch/SKILL.md`](skills/orca-dispatch/SKILL.md)。技能正文是中文写的，面向中文工作流。
+技能正文是中文写的，面向中文工作流。
 
 ## 它解决什么问题
 
 直接用多个 agent 并行写代码，常见的麻烦是：任务拆得互相踩文件；worker 做完了没人知道；收件箱里的消息被反复读到同一批；"测试通过"只是 worker 自己说的；最后合并时一团乱。
 
-orca-dispatch 把这些都写成了 coordinator 的固定职责：
+两个技能都把这些写成 coordinator 的固定职责，并遵守各自宿主的能力边界：
 
 - **派发前先想清楚**：修 bug 先造一条能稳定复现的命令再找根因；做新功能先读已有 PRD，没想好就先问清楚、写成 PRD。
 - **任务互不重叠**：每个任务是一条能独立验证的窄切片，同一波次内文件不重叠，有依赖就分波次。
-- **不漏消息**：建一个 Run，逐批处理并确认（`--ack`）worker 的消息，连续空等三次就去查 worker 状态，只凭确凿证据才停止或重派。
-- **验收不靠自述**：coordinator 亲自重跑验证命令，用双轴审查（是否符合规范、是否符合需求）看每个分支，再逐个合并、跑全量验证、清理 worktree 和终端。
-- **能接着做**：会话中断后，用 `继续 <run_id>` 按 Orca 和 Git 的实际状态恢复，不重做已合并的任务。
+- **协调任务**：Orca 版本通过 Run、worker 和消息回执监督；Codex 版本通过原生子代理与任务账本跟踪进度和负责人。
+- **验收不靠自述**：coordinator 亲自重跑验证命令，按规范和需求分别审查；集成、清理与推送遵守对应宿主和项目授权。
+- **按证据恢复**：中断后依据 Orca 或 Codex 的实际代理状态、Git 状态和已有记录继续，不重做已集成的任务。
+
+## 技能选择
+
+| 技能 | 适用环境 | 协作方式 | 恢复方式 |
+|---|---|---|---|
+| [orca-dispatch](skills/orca-dispatch/SKILL.md) | 配置了 Orca 的 Claude Code 或 Codex | Orca Run、worker、独立分支 | `继续 <run_id>`，以 Orca 和 Git 状态为准 |
+| [codex-orchestration](skills/codex-orchestration/SKILL.md) | Codex | Codex 原生子代理；不伪造 Orca Run/Dispatch | 检查代理、Git 与项目任务账本，从最早未完成步骤继续 |
 
 ## 流程
+
+以下图示说明 `orca-dispatch` 的 Orca 流程；Codex 原生流程见 [`codex-orchestration`](skills/codex-orchestration/SKILL.md)。
 
 <p align="center">
   <img src="./assets/readme/workflow.svg" width="100%" alt="Workflow: sync and investigate, clarify and plan, split and dispatch, supervise workers, then review, merge and clean up">
@@ -45,7 +54,7 @@ orca-dispatch 把这些都写成了 coordinator 的固定职责：
 /orca-dispatch 继续 run_3f9c
 ```
 
-Codex 里把 `/` 换成 `$`：`$orca-dispatch …`
+Codex 里调用 Orca 技能时把 `/` 换成 `$`：`$orca-dispatch …`。若使用 Codex 原生代理协作，调用 `$codex-orchestration …`。
 
 | 参数 | 作用 |
 |---|---|
@@ -59,7 +68,7 @@ Codex 里把 `/` 换成 `$`：`$orca-dispatch …`
 
 ## 安装
 
-这是一个技能目录，复制或软链到你的 agent 会读取的技能目录即可：
+这是技能目录，按需复制或软链到对应 agent 会读取的技能目录。以下以仓库根目录为当前目录：
 
 ```bash
 git clone https://github.com/sys98/agent-group.git
@@ -69,19 +78,32 @@ ln -s "$PWD/agent-group/skills/orca-dispatch" ~/.claude/skills/orca-dispatch
 ln -s "$PWD/agent-group/skills/orca-dispatch" ~/.agents/skills/orca-dispatch
 ```
 
+Codex 原生编排技能：
+
+```bash
+# Codex skill directory
+ln -s "$PWD/agent-group/skills/codex-orchestration" ~/.codex/skills/codex-orchestration
+
+# Shared agent skill directory
+ln -s "$PWD/agent-group/skills/codex-orchestration" ~/.agents/skills/codex-orchestration
+```
+
 ### 依赖
 
 | 依赖 | 用途 | 来源 |
 |---|---|---|
-| Orca 与 `orchestration`、`orca-cli` 技能 | worker 派发、收件箱、worktree | Orca 自带 |
+| Orca 与 `orchestration`、`orca-cli` 技能 | `orca-dispatch` 的 worker 派发、收件箱、worktree | Orca 自带 |
 | `grilling`、`prototype` | 澄清需求 | [mattpocock/skills](https://github.com/mattpocock/skills) |
 | `diagnosing-bugs`、`tdd` | 排查 bug、worker 先写测试 | 同上 |
 | `to-tickets`、`code-review` | 切片原则、双轴审查 | 同上 |
 
-Codex 想用原生选择题，需要在 `config.toml` 的 `[features]` 下加 `default_mode_request_user_input = true`（开发中的实验功能）。
+`codex-orchestration` 使用 Codex 的原生协作工具；按阶段加载 `grilling`、`prototype`、`diagnosing-bugs`、`to-tickets`、`tdd`、`codebase-design` 与 `code-review`。各宿主实际可用工具和项目规范优先，不把 Orca 专属命令当成 Codex 能力。
+
+`orca-dispatch` 在 Codex 中使用原生选择题时，需要在 `config.toml` 的 `[features]` 下启用 `default_mode_request_user_input = true`（开发中的实验功能）。`codex-orchestration` 是否能调用选择题工具取决于当前会话实际提供的能力。
 
 ## 限制
 
-- 已在 Orca 1.4.222、Claude Code 2.1.296、Codex CLI 0.162.1 上按命令帮助逐项核对过；完整的多 worker 编排仍在实际使用中打磨。
+- `orca-dispatch` 已在 Orca 1.4.222、Claude Code 2.1.296、Codex CLI 0.162.1 上按命令帮助逐项核对过；完整的多 worker 编排仍在实际使用中打磨。
+- `codex-orchestration` 依赖 Codex 当前会话实际提供的原生代理和任务协调工具；没有 Orca FIFO ack、PTY 唤醒或持久 Run 的等价保证。
 - worker 默认是 Claude 模型，分支名要求用中文，这些是作者的工作习惯，按需改 `SKILL.md`。
 - 适合单个功能或 bug 的一次交付；跨多天、需要 issue tracker 管理的大工程不是它的目标。

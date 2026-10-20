@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex 交付编排"
+  short_description: "在 Codex 内协调并行实施、文件归属、独立审查和真实业务验收"
+  default_prompt: "使用 $codex-orchestration 拆分任务，协调 Codex 子代理实施并验证，直到授权范围内的交付完成。"
