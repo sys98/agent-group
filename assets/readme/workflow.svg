@@ -1,64 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="430" viewBox="0 0 1200 430" role="img" aria-labelledby="title desc">
-  <title id="title">orca-dispatch workflow</title>
-  <desc id="desc">Coordinator syncs and investigates, reports a plan, splits work into waves of Orca workers, supervises them, reviews each branch, then merges and verifies.</desc>
-
-  <rect width="1200" height="430" rx="24" fill="#0B0F14"/>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="500" viewBox="0 0 1200 500" role="img" aria-labelledby="title desc">
+  <title id="title">orca-dispatch 的工作流程</title>
+  <desc id="desc">Orca coordinator 先调查并计划，再分波派发和监督 worker，最后双轴审查、集成验证并按授权收尾。</desc>
+  <rect width="1200" height="500" rx="24" fill="#0B0F14"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
-    <text x="56" y="70" font-size="40" font-weight="700" fill="#E8E4DA">一次编排的完整路径</text>
-    <text x="56" y="108" font-size="20" fill="#7A8594">琥珀色是需要你拍板的地方，其余由 coordinator 自己完成</text>
+    <text x="58" y="68" font-size="40" font-weight="700" fill="#F1EEE7">orca-dispatch · 从问题到集成验证</text>
+    <text x="58" y="108" font-size="20" fill="#8994A3">流程图仅描述 Orca 版本；Codex 原生协作见对应技能说明</text>
   </g>
 
-  <g id="stages" transform="translate(56 150)" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
-    <g id="s1">
-      <rect x="0" y="0" width="168" height="196" rx="14" fill="#111821" stroke="#243041"/>
-      <text x="20" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#7A8594">0–2</text>
-      <text x="20" y="80" font-size="24" font-weight="600" fill="#E8E4DA">同步</text>
-      <text x="20" y="112" font-size="24" font-weight="600" fill="#E8E4DA">与调查</text>
-      <text x="20" y="152" font-size="18" fill="#7A8594">bug: 先复现</text>
-      <text x="20" y="178" font-size="18" fill="#7A8594">功能: 读 PRD</text>
+  <g id="stages" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g transform="translate(58 150)">
+      <rect width="1084" height="86" rx="14" fill="#111821" stroke="#263140" stroke-width="2"/>
+      <circle cx="46" cy="43" r="22" fill="#202A35"/>
+      <text x="46" y="50" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" fill="#F1EEE7">01</text>
+      <text x="88" y="39" font-size="25" font-weight="650" fill="#F1EEE7">同步、调查与计划</text>
+      <text x="88" y="68" font-size="20" fill="#AEB8C5">bug 先复现找根因；功能先读需求，只澄清影响实现的决策</text>
+      <rect x="884" y="24" width="174" height="38" rx="19" fill="#1A1508" stroke="#D7A84A"/>
+      <text x="971" y="50" text-anchor="middle" font-size="18" fill="#D7A84A">需要时你拍板</text>
     </g>
-    <path d="M176 98 H200" stroke="#3B4A5E" stroke-width="3"/>
+    <path d="M600 236 V258" stroke="#526071" stroke-width="3"/>
+    <path d="M591 250 L600 260 L609 250" fill="none" stroke="#526071" stroke-width="3"/>
 
-    <g id="s2" transform="translate(208 0)">
-      <rect x="0" y="0" width="168" height="196" rx="14" fill="#1A1508" stroke="#F5B544"/>
-      <text x="20" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#F5B544">2–3</text>
-      <text x="20" y="80" font-size="24" font-weight="600" fill="#E8E4DA">澄清</text>
-      <text x="20" y="112" font-size="24" font-weight="600" fill="#E8E4DA">与计划</text>
-      <text x="20" y="152" font-size="18" fill="#C9A86A">选项式提问</text>
-      <text x="20" y="178" font-size="18" fill="#C9A86A">你确认计划</text>
+    <g transform="translate(58 270)">
+      <rect width="1084" height="86" rx="14" fill="#111821" stroke="#263140" stroke-width="2"/>
+      <circle cx="46" cy="43" r="22" fill="#202A35"/>
+      <text x="46" y="50" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" fill="#F1EEE7">02</text>
+      <text x="88" y="39" font-size="25" font-weight="650" fill="#F1EEE7">按波次派发并监督 worker</text>
+      <text x="88" y="68" font-size="20" fill="#AEB8C5">明确文件归属与验收标准；coordinator 持续跟进回执和阻碍</text>
+      <g transform="translate(880 24)" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18">
+        <rect width="70" height="38" rx="8" fill="#0B0F14"/><text x="35" y="25" text-anchor="middle" fill="#AEB8C5">task A</text>
+        <rect x="80" width="70" height="38" rx="8" fill="#0B0F14"/><text x="115" y="25" text-anchor="middle" fill="#AEB8C5">task B</text>
+        <rect x="160" width="40" height="38" rx="8" fill="#0B0F14"/><text x="180" y="25" text-anchor="middle" fill="#AEB8C5">…</text>
+      </g>
     </g>
-    <path d="M384 98 H408" stroke="#3B4A5E" stroke-width="3"/>
+    <path d="M600 356 V378" stroke="#526071" stroke-width="3"/>
+    <path d="M591 370 L600 380 L609 370" fill="none" stroke="#526071" stroke-width="3"/>
 
-    <g id="s3" transform="translate(416 0)">
-      <rect x="0" y="0" width="168" height="196" rx="14" fill="#111821" stroke="#243041"/>
-      <text x="20" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#7A8594">4–5</text>
-      <text x="20" y="80" font-size="24" font-weight="600" fill="#E8E4DA">拆分</text>
-      <text x="20" y="112" font-size="24" font-weight="600" fill="#E8E4DA">并派发</text>
-      <text x="20" y="152" font-size="18" fill="#7A8594">窄切片</text>
-      <text x="20" y="178" font-size="18" fill="#7A8594">按波次并行</text>
-    </g>
-    <path d="M592 98 H616" stroke="#3B4A5E" stroke-width="3"/>
-
-    <g id="s4" transform="translate(624 0)">
-      <rect x="0" y="0" width="168" height="196" rx="14" fill="#111821" stroke="#243041"/>
-      <text x="20" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#7A8594">6</text>
-      <text x="20" y="80" font-size="24" font-weight="600" fill="#E8E4DA">监督</text>
-      <text x="20" y="112" font-size="24" font-weight="600" fill="#E8E4DA">worker</text>
-      <text x="20" y="152" font-size="18" fill="#7A8594">逐批 ack</text>
-      <text x="20" y="178" font-size="18" fill="#7A8594">只信确凿证据</text>
-    </g>
-    <path d="M800 98 H824" stroke="#3B4A5E" stroke-width="3"/>
-
-    <g id="s5" transform="translate(832 0)">
-      <rect x="0" y="0" width="256" height="196" rx="14" fill="#0E1A14" stroke="#3DDC97"/>
-      <text x="20" y="40" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#3DDC97">7–9</text>
-      <text x="20" y="80" font-size="24" font-weight="600" fill="#E8E4DA">review、合并</text>
-      <text x="20" y="112" font-size="24" font-weight="600" fill="#E8E4DA">与收尾</text>
-      <text x="20" y="152" font-size="18" fill="#8FD9B6">双轴审查 · 全量验证</text>
-      <text x="20" y="178" font-size="18" fill="#8FD9B6">清理分支与终端</text>
+    <g transform="translate(58 390)">
+      <rect width="1084" height="78" rx="14" fill="#0E1A14" stroke="#3D9B7D" stroke-width="2"/>
+      <circle cx="46" cy="39" r="22" fill="#173127"/>
+      <text x="46" y="46" text-anchor="middle" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="20" font-weight="700" fill="#76D2B3">03</text>
+      <text x="88" y="37" font-size="25" font-weight="650" fill="#F1EEE7">双轴审查、集成验证与收尾</text>
+      <text x="88" y="64" font-size="20" fill="#A7CBBE">逐分支复核规范与需求，再集成；推送和部署遵守授权</text>
+      <text x="1045" y="48" text-anchor="end" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#76D2B3">REVIEW → VERIFY</text>
     </g>
   </g>
-
-  <text x="56" y="392" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="18" fill="#7A8594">中断后：继续 &lt;run_id&gt; 按 Orca 与 Git 的实际状态接着做</text>
 </svg>
