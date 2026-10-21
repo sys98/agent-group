@@ -1,6 +1,6 @@
 interface:
   display_name: "Codex 交付编排"
-  short_description: "创建可见、可续作的 Codex App 工作树任务，协调 Matt 审查、集成与归档恢复"
-  default_prompt: "使用 $codex-orchestration 为已确认计划在 Codex App 新建独立工作树任务，持续发送本次协调消息，并在验收和集成通过后归档；保持已运行 worker 的原合同。"
+  short_description: "分析依赖与冲突，按波次并发协调可见的 App 工作树任务、审查与归档恢复"
+  default_prompt: "使用 $codex-orchestration 分析已确认计划中可并发的任务与真实依赖，在 Codex App 新建独立工作树任务并按波次并发协调；验收和集成通过后归档，保持已运行 worker 的原合同。"
 policy:
   allow_implicit_invocation: false

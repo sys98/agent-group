@@ -10,7 +10,7 @@
 
 ## 派发材料
 
-- Task ID、尝试 ID、波次、blockers、负责人、模型与选择依据。
+- Task ID、尝试 ID、并发组/波次、blockers 及其具体产出、负责人、模型与选择依据；同波并行任务、共享资源互斥步骤和串行等待原因。
 - 已确认的 App threadId、hostId、projectId、实际标题、托管 worktree identityKey；创建、协调消息和归档/保留各自的人类授权坐标。
 - 用户目标、最新纠正、非目标、授权边界、可观察业务验收。
 - 仓库与 Git common dir 的真实路径、独立 worker worktree 的真实路径、任务分支、完整 base SHA；必须保留的已有输入及其来源。
@@ -43,6 +43,9 @@ During implementation:
 - Do not use private implementation mocks or tautological assertions as acceptance evidence.
 - Edit only owned paths in this worktree; do not merge, push, deploy, change shared services,
   read credentials, or edit project MEMORY.md. Do not switch another worktree or branch.
+- Other tasks in this wave may run concurrently. Respect the assigned file ownership,
+  ports, database and resource locks. Report new dependencies or conflicts to the coordinator;
+  do not absorb a sibling task or modify its branch to bypass the dependency.
 - Check instructions in this chat and the task contract at natural checkpoints: before
   new files, after verification, and before reporting. Do not assume an Orca mailbox.
 - Report results and questions in this chat. Do not message another chat just because
